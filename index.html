@@ -66,21 +66,24 @@
     ];
 
     async function connectWallet() {
-        if (window.ethereum) {
-            try {
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                signer = provider.getSigner();
-                console.log("Wallet connected!");
-                document.getElementById("claimAirdropButton").disabled = false;
-            } catch (error) {
-                console.error("Wallet connection failed:", error);
-                alert("Failed to connect wallet. Please try again.");
-            }
-        } else {
-            alert("Please install MetaMask to connect your wallet.");
+    if (window.ethereum) {
+        try {
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            await provider.send("wallet_switchEthereumChain", [{ chainId: "0xAA36A7" }]); // Sepolia Testnet
+            await provider.send("eth_requestAccounts", []); // Request wallet access
+            signer = provider.getSigner();
+            console.log("Wallet connected:", await signer.getAddress());
+            document.getElementById("claimAirdropButton").disabled = false;
+            alert("Wallet connected successfully!");
+        } catch (error) {
+            console.error("Failed to connect wallet:", error.message);
+            alert("Failed to connect wallet. Please check your MetaMask and try again.");
         }
+    } else {
+        alert("Please install MetaMask to connect your wallet.");
     }
+}
+
 
     async function claimAirdrop() {
         try {

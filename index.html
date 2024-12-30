@@ -34,6 +34,29 @@
     let userAccount;
 
     document.getElementById("connectWallet").addEventListener("click", async () => {
+  if (window.ethereum) {
+    try {
+      // Menghubungkan wallet
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      web3 = new Web3(window.ethereum);
+
+      // Mendapatkan alamat wallet pengguna
+      userAccount = (await web3.eth.getAccounts())[0];
+      document.getElementById("walletStatus").textContent = "Terhubung: " + userAccount;
+
+      // Menambahkan tanda tangan
+      const message = "Saya ingin terhubung ke smart contract.";
+      const signature = await web3.eth.personal.sign(message, userAccount, "");
+      console.log("Tanda tangan:", signature);
+    } catch (error) {
+      console.error("Gagal menghubungkan wallet:", error);
+    }
+  } else {
+    alert("Metamask tidak ditemukan! Harap instal Metamask untuk melanjutkan.");
+  }
+});
+
+    document.getElementById("connectWallet").addEventListener("click", async () => {
       if (window.ethereum) {
         try {
           // Meminta akses ke wallet

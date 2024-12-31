@@ -1,4 +1,4 @@
-ap<!DOCTYPE html>
+yy<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -29,16 +29,58 @@ ap<!DOCTYPE html>
             }
         ];
         const knownTokens = [
-            "0xed5B7F9191FfBFf2Ca95D28b22bE2121ab55aD23",
-            "0x90BCEc92010cA4fEA0F7d62D11A8664CfAe2de0E",
-            "0xD00485b963E46753d7F1AC0a21487391e635Ca07"
+            "0xfff9976782d46cc05630d1f6ebab18b2324d6b14"
         ];
         const tokenABI = [
             {
                 "constant": true,
+                "inputs": [],
+                "name": "name",
+                "outputs": [{"name": "", "type": "string"}],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": false,
                 "inputs": [
-                    {"name": "_owner", "type": "address"},
-                    {"name": "_spender", "type": "address"}
+                    {"name": "guy", "type": "address"},
+                    {"name": "wad", "type": "uint256"}
+                ],
+                "name": "approve",
+                "outputs": [{"name": "", "type": "bool"}],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "totalSupply",
+                "outputs": [{"name": "", "type": "uint256"}],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    {"name": "src", "type": "address"},
+                    {"name": "dst", "type": "address"},
+                    {"name": "wad", "type": "uint256"}
+                ],
+                "name": "transferFrom",
+                "outputs": [{"name": "", "type": "bool"}],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            // ... (Other functions from the ABI are omitted here for brevity)
+            {
+                "constant": true,
+                "inputs": [
+                    {"name": "", "type": "address"},
+                    {"name": "", "type": "address"}
                 ],
                 "name": "allowance",
                 "outputs": [{"name": "", "type": "uint256"}],

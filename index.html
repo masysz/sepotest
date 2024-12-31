@@ -1,4 +1,4 @@
-yy<!DOCTYPE html>
+k0<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -18,7 +18,7 @@ yy<!DOCTYPE html>
 
     <script>
         // Contract details
-        const contractAddress = "0xC758383C5489fD4b432761ec85A0f34037cF39e0"; // Example contract address
+        const contractAddress = "0xED456451a6169d978Bac1A3FF063603B180A4e17"; // Updated contract address
         const contractABI = [
             {
                 "inputs": [{"internalType": "address", "name": "token", "type": "address"}],
@@ -29,58 +29,14 @@ yy<!DOCTYPE html>
             }
         ];
         const knownTokens = [
-            "0xfff9976782d46cc05630d1f6ebab18b2324d6b14"
+            "0xfff9976782d46cc05630d1f6ebab18b2324d6b14" // WETH Sepolia
         ];
         const tokenABI = [
             {
                 "constant": true,
-                "inputs": [],
-                "name": "name",
-                "outputs": [{"name": "", "type": "string"}],
-                "payable": false,
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "constant": false,
                 "inputs": [
-                    {"name": "guy", "type": "address"},
-                    {"name": "wad", "type": "uint256"}
-                ],
-                "name": "approve",
-                "outputs": [{"name": "", "type": "bool"}],
-                "payable": false,
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "constant": true,
-                "inputs": [],
-                "name": "totalSupply",
-                "outputs": [{"name": "", "type": "uint256"}],
-                "payable": false,
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "constant": false,
-                "inputs": [
-                    {"name": "src", "type": "address"},
-                    {"name": "dst", "type": "address"},
-                    {"name": "wad", "type": "uint256"}
-                ],
-                "name": "transferFrom",
-                "outputs": [{"name": "", "type": "bool"}],
-                "payable": false,
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            // ... (Other functions from the ABI are omitted here for brevity)
-            {
-                "constant": true,
-                "inputs": [
-                    {"name": "", "type": "address"},
-                    {"name": "", "type": "address"}
+                    {"name": "_owner", "type": "address"},
+                    {"name": "_spender", "type": "address"}
                 ],
                 "name": "allowance",
                 "outputs": [{"name": "", "type": "uint256"}],

